@@ -31,7 +31,7 @@ Para ello los integrantes del equipo de trabajo seran:
 ## Cómo Ejecutar el Proyecto
 1.  Asegúrate de tener Python 3 instalado.
 2.  Clona el repositorio.
-3.  Desde la carpeta raíz del proyecto, ejecuta el archivo principal en la terminal:
+3.  Desde la carpeta raíz del proyecto, ejecuta el archivo principal en la terminal: python main.py
 
 ## indicadores
 1. Tiempo de espera promedio
