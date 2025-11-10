@@ -1,3 +1,5 @@
+https://github.com/Guatibal/INFO081-69
+
 El presente informe detalla el diseño para el proyecto de simulación de una red ferroviaria.
 El propósito del sistema  es ofrecer una herramienta interactiva donde un usuario,
 en el rol de "Operario", pueda modelar, ejecutar y monitorear el tráfico de trenes en una red definida.
