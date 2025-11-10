@@ -1,3 +1,6 @@
 [submodule "demanda-gen"]
 	path = demanda-gen
 	url = https://github.com/Santasy/INFO81-S2-G1-DesCom01
+[submodule "modules/modulo-eventos"]
+	path = modules/modulo-eventos
+	url = https://github.com/Santasy/INFO081-S2-DesCom02
