@@ -25,3 +25,12 @@ Para ello los integrantes del equipo de trabajo seran:
 -Sebastian Pohl
 -Gabriel Rios
 -Tomás Riquelme
+
+## Cómo Ejecutar el Proyecto
+1.  Asegúrate de tener Python 3 instalado.
+2.  Clona el repositorio.
+3.  Desde la carpeta raíz del proyecto, ejecuta el archivo principal en la terminal:
+
+## indicadores
+1. Tiempo de espera promedio
+2. Total de pasajeros transportados hoy
