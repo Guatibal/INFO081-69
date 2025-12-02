@@ -43,12 +43,48 @@ class EstadoSimulacion:
             self.pasajeros[entidad.id] = entidad
 
     def avanzar_tiempo(self, segundos=60):
-        """Avanza el reloj y mueve las entidades."""
         self.tiempo_actual += datetime.timedelta(seconds=segundos)
         
-        # Mover todos los trenes
+        # 1. Actualizar Estaciones (Generar pasajeros)
+        for id_est, estacion in self.estaciones.items():
+            estacion.actualizar(self.tiempo_actual)
+
+        # 2. Mover Trenes y Gestionar Paradas
         for id_tren, tren in self.trenes.items():
             tren.mover(segundos, self.tiempo_actual)
+            
+            # Si el tren está en una estación (sea porque acaba de llegar o sigue ahí)
+            if tren.en_estacion:
+                self.gestionar_parada_tren(tren)
+            
+    def gestionar_parada_tren(self, tren):
+        """Maneja la lógica de subir y bajar pasajeros cuando el tren llega."""
+        estacion = tren.obtener_estacion_actual()
+        if not estacion:
+            return
+
+        # 1. Bajar pasajeros (Si su destino es esta estación)
+        bajan = tren.bajar_pasajeros_en_estacion(estacion.id)
+        for p in bajan:
+            p.completar_viaje(self.tiempo_actual)
+            print(f"   ⬇️ Pasajero {p.id} se bajó en {estacion.nombre}")
+
+        # 2. Subir pasajeros (Si caben y el tren les sirve)
+        # Nota: Aquí podríamos filtrar si el tren va a donde ellos quieren,
+        # pero para simplificar, asumiremos que se suben al primero que pasa.
+        suben = []
+        # Iteramos sobre una copia de la lista porque vamos a borrar elementos
+        for p in list(estacion.andenes):
+            if tren.subir_pasajero(p):
+                estacion.andenes.remove(p)
+                p.estado = "VIAJANDO"
+                suben.append(p)
+            else:
+                # El tren se llenó
+                break
+        
+        if suben:
+            print(f"   ⬆️ {len(suben)} pasajeros subieron al tren {tren.id} en {estacion.nombre}")
 
     def crear_snapshot(self):
         """
