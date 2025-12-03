@@ -10,9 +10,6 @@
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
             "env": {
-                
-                // Agregamos ';${workspaceFolder}/modules/modulo-eventos'
-                // para que Python encuentre el código del otro GitHub.
                 "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/modules/modulo-eventos"
             }
         }
@@ -66,4 +63,5 @@
         }
     ]
 }
+
 
