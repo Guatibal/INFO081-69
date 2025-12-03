@@ -201,17 +201,38 @@ class VentanaPrincipal:
                 self.imprimir_log(f">>> PARTIDA GUARDADA EN {ruta}")
 
     def cargar_partida(self):
-        ruta = filedialog.askopenfilename(filetypes=[("Archivos", "*.sim")])
+        ruta = filedialog.askopenfilename(
+            filetypes=[("Archivos de Simulacion", "*.sim"), ("Todos", "*.*")],
+            title="Cargar Línea Temporal"
+        )
         if ruta:
-            nuevo = SistemaGuardado.cargar_estado(ruta)
-            if nuevo:
-                self.estado = nuevo
+            nuevo_estado = SistemaGuardado.cargar_estado(ruta)
+            if nuevo_estado:
+                # 1. Reemplazamos el cerebro de la simulación
+                self.estado = nuevo_estado
+                
+                # 2. Actualizamos gráficos y tiempo
+                self.lbl_tiempo.config(text=f"Tiempo: {self.estado.tiempo_actual}")
                 self.dibujar_mapa()
+                
+                # 3. RESTAURAR LA BITÁCORA (Aquí está la magia)
+                self.txt_log.config(state=tk.NORMAL) # Desbloquear
+                self.txt_log.delete(1.0, tk.END)     # Borrar texto actual
+                
+                # Verificamos si el archivo guardado tiene historial (por compatibilidad)
+                if hasattr(self.estado, 'historial_logs'):
+                    for linea in self.estado.historial_logs:
+                        self.txt_log.insert(tk.END, linea + "\n")
+                
+                self.txt_log.see(tk.END) # Bajar scroll al final
+                self.txt_log.config(state=tk.DISABLED) # Bloquear de nuevo
+
+                # 4. Pausamos y avisamos
                 self.ejecutando = False
-                messagebox.showinfo("Multiverso", "Cargado OK")
-                self.txt_log.config(state=tk.NORMAL)
-                self.txt_log.delete(1.0, tk.END)
-                self.imprimir_log(">>> LÍNEA TEMPORAL CARGADA")
+                self.btn_pausa.config(text="▶ Reanudar", bg="#27ae60")
+                messagebox.showinfo("Multiverso", "¡Viaje en el tiempo completado!\nBitácora restaurada.")
+            else:
+                messagebox.showerror("Error", "Archivo corrupto.")
 
     def zoom(self, factor, cx=None, cy=None):
         self.canvas.update_idletasks()
