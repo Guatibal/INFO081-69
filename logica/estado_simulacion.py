@@ -71,7 +71,6 @@ class EstadoSimulacion:
         # 1. Bajar pasajeros
         bajan = tren.bajar_pasajeros_en_estacion(estacion.id)
         if bajan:
-            # En vez de print, usamos agregar_log
             self.agregar_log(f"Tren {tren.id} llegó a {estacion.nombre}: Bajaron {len(bajan)}.")
             
         for p in bajan:
