@@ -66,18 +66,18 @@
         },
         {
             "tren_id": "caca",
-            "origen": "a",
-            "destino": "final"
+            "origen": "dulces",
+            "destino": "fabrica"
         },
         {
             "tren_id": "caccatua",
-            "origen": "fabrica",
-            "destino": "dulces"
+            "origen": "dulces",
+            "destino": "final"
         },
         {
             "tren_id": "brasilenio",
             "origen": "dulces",
-            "destino": "fabrica"
+            "destino": "b1"
         }
     ]
 }

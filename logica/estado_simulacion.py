@@ -1,10 +1,6 @@
 import datetime
 import copy
 from collections import deque
-try:
-    from ppdc_event_manager import LineaDeEventos
-except ImportError:
-    LineaDeEventos = None
 
 class EstadoSimulacion:
     def __init__(self):
@@ -39,11 +35,6 @@ class EstadoSimulacion:
 
         self.logs_pendientes = []
 
-        if LineaDeEventos:
-            self.linea_eventos = LineaDeEventos(self.tiempo_inicio)
-        else:
-            self.linea_eventos = None
-
     def registrar_entidad(self, entidad):
         """Método genérico para guardar estaciones, trenes o rutas."""
         # Detectamos el tipo de objeto y lo guardamos en su diccionario
@@ -64,6 +55,7 @@ class EstadoSimulacion:
         return self.hora_almuerzo_inicio <= hora_actual < self.hora_almuerzo_fin
 
     def avanzar_tiempo(self, segundos=60):
+        hora_anterior = self.tiempo_actual.hour
         self.tiempo_actual += datetime.timedelta(seconds=segundos)
         hora_actual = self.tiempo_actual.hour
         
@@ -87,44 +79,17 @@ class EstadoSimulacion:
             for id_tren, tren in self.trenes.items():
                 tren.pausado_por_almuerzo = False
         
-        # 2. Sincronización Eventos (Si existe)
-        if self.linea_eventos: pass 
-
-        # 3. Actualizar Estaciones
+        # 1. Actualizar Estaciones (Generar pasajeros)
         for id_est, estacion in self.estaciones.items():
             estacion.actualizar(self.tiempo_actual)
 
-        # --- LÓGICA DE HORARIO ---
-        hora = self.tiempo_actual.hour
-        es_horario_servicio = (6 <= hora < 24)
-
-        # Logs informativos
-        if hora == 6 and self.tiempo_actual.minute == 0:
-            self.agregar_log("🌞 INICIO DE SERVICIO (06:00 AM)")
-        elif hora == 0 and self.tiempo_actual.minute == 0:
-            self.agregar_log("🌙 FIN DE SERVICIO - Trenes finalizarán su tramo actual")
-
-        # 4. Mover Trenes
+        # 2. Mover Trenes y Gestionar Paradas
         for id_tren, tren in self.trenes.items():
+            tren.mover(segundos, self.tiempo_actual)
             
-            # --- AQUÍ ESTÁ EL CAMBIO CLAVE ---
-            # El tren se mueve SI es horario de servicio 
-            # O SI el tren NO está en una estación (está a mitad de camino)
-            debe_moverse = es_horario_servicio or (not tren.en_estacion)
-            
-            if debe_moverse:
-                tren.mover(segundos, self.tiempo_actual)
-                
-                # Si llega a una estación, procesamos pasajeros normalmente
-                if tren.en_estacion:
-                    self.gestionar_parada_tren(tren)
-                    
-                    # Si es de noche (fuera de horario), avisamos que se estacionó
-                    if not es_horario_servicio:
-                         self.agregar_log(f"💤 Tren {tren.id} finalizó recorrido en {tren.obtener_estacion_actual().nombre} y duerme hasta las 6 AM.")
-            else:
-                # El tren está en estación y es de noche: NO HACE NADA (Duerme)
-                pass
+            # Si el tren está en una estación (sea porque acaba de llegar o sigue ahí)
+            if tren.en_estacion:
+                self.gestionar_parada_tren(tren)
             
     def agregar_log(self, mensaje):
         """Guarda un mensaje con la hora actual para la interfaz."""
