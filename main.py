@@ -1,59 +1,106 @@
-# 1. Imports
+# main.py
+
+# 1. Imports del Sistema
+import tkinter as tk
+
+# 2. Imports de Lógica y Modelos
 from logica.estado_simulacion import EstadoSimulacion
+from logica.gestor_datos import GestorDatos # <--- NUEVO: Para leer el JSON
 from models.estacion import Estacion
 from models.ruta import Ruta
 from models.tren import Tren
 from models.generador import GeneradorPasajeros
+
+# 3. Imports de Interfaz Gráfica
 from ui.ventana_principal import VentanaPrincipal
-from ui.ventana_config import VentanaConfig # <--- Importamos el nuevo launcher
+from ui.ventana_config import VentanaConfig 
 
 def iniciar_simulacion_real():
     """
-    Esta función contiene toda la lógica de carga de datos (Hardcodeada por ahora).
-    Se ejecutará SOLO cuando el usuario presione el botón en el Launcher.
+    Esta función se ejecuta al dar click en 'Iniciar Simulación' en el Launcher.
+    Carga los datos desde el GestorDatos (JSON) y construye el mundo.
     """
-    print("Cargando simulación...")
+    print("--- INICIANDO SIMULACIÓN ---")
+    print("Cargando datos desde gestor...")
     
-    # --- 1. Inicializar el estado ---
+    # 1. Inicializar el estado y el gestor
     simulacion = EstadoSimulacion()
+    gestor = GestorDatos() # Esto carga automáticamente el JSON si existe
+    datos = gestor.obtener_datos()
 
-    # --- 2. Crear Estaciones ---
-    est1 = Estacion("Central", 1000, x=100, y=300)
-    est2 = Estacion("Norte", 500, x=400, y=100)
-    est3 = Estacion("Sur", 500, x=400, y=500)
+    # --- PROTECCIÓN: SI NO HAY DATOS ---
+    # Si el usuario no ha creado nada en el Admin, creamos datos por defecto
+    if not datos["estaciones"]:
+        print("⚠️ No hay estaciones configuradas. Usando datos de emergencia.")
+        # Creamos 2 estaciones básicas en memoria (no se guardan en json)
+        datos["estaciones"] = [
+            {'id': 'Central', 'nombre': 'Central', 'vias': 2, 'x': 100, 'y': 300},
+            {'id': 'Norte', 'nombre': 'Norte', 'vias': 1, 'x': 400, 'y': 100}
+        ]
+        datos["trenes"] = [{'id': 'T01', 'capacidad': 100, 'velocidad': 10}]
 
-    simulacion.registrar_entidad(est1)
-    simulacion.registrar_entidad(est2)
-    simulacion.registrar_entidad(est3)
+    # Diccionario temporal para guardar los objetos Estacion creados
+    # Lo necesitamos para luego asignar las rutas y generadores
+    mapa_estaciones_obj = {} 
 
-    # --- 3. Configurar Generadores ---
-    gen_central = GeneradorPasajeros("Central", ["Norte", "Sur"])
-    est1.asignar_generador(gen_central)
+    # --- 2. CREAR ESTACIONES ---
+    print(f"Generando {len(datos['estaciones'])} estaciones...")
+    for est_data in datos["estaciones"]:
+        # Crear objeto Estacion
+        nueva_estacion = Estacion(est_data['id'], 500, x=est_data['x'], y=est_data['y'])
+        
+        # Generar las VÍAS según el número configurado
+        for i in range(est_data['vias']):
+            nueva_estacion.vias.append(f"Via-{i+1}")
+            
+        simulacion.registrar_entidad(nueva_estacion)
+        mapa_estaciones_obj[est_data['id']] = nueva_estacion
+
+    # --- 3. CONFIGURAR GENERADORES DE PASAJEROS ---
+    # Ahora que todas las estaciones existen, podemos decirles a dónde va la gente
+    lista_todos_ids = list(mapa_estaciones_obj.keys())
     
-    gen_norte = GeneradorPasajeros("Norte", ["Sur"])
-    est2.asignar_generador(gen_norte)
+    for id_est, estacion_obj in mapa_estaciones_obj.items():
+        # Los destinos posibles son todas las estaciones MENOS la propia
+        destinos_posibles = [uid for uid in lista_todos_ids if uid != id_est]
+        
+        # Asignar generador
+        gen = GeneradorPasajeros(id_est, destinos_posibles)
+        estacion_obj.asignar_generador(gen)
+
+    # --- 4. CREAR RUTAS AUTOMÁTICAS ---
+    # Como aún no administramos rutas complejas, crearemos una ruta única
+    # que conecte todas las estaciones en el orden que fueron creadas.
+    lista_objs_estaciones = list(mapa_estaciones_obj.values())
     
-    gen_sur = GeneradorPasajeros("Sur", ["Central"])
-    est3.asignar_generador(gen_sur)
+    # Solo creamos ruta si hay al menos 2 estaciones
+    ruta_principal = None
+    if len(lista_objs_estaciones) >= 2:
+        # Calculamos tiempos (ej: 10 min entre cada una)
+        tiempos = [10] * (len(lista_objs_estaciones) - 1)
+        
+        ruta_principal = Ruta("Ruta-General", lista_objs_estaciones, tiempos)
+        simulacion.registrar_entidad(ruta_principal)
+        print("Ruta automática creada conectando todas las estaciones.")
 
-    # --- 4. Crear Rutas y Trenes ---
-    ruta1 = Ruta("R1", [est1, est2, est3], [10, 10])
-    simulacion.registrar_entidad(ruta1)
+    # --- 5. CREAR TRENES ---
+    print(f"Generando {len(datos['trenes'])} trenes...")
+    for tren_data in datos["trenes"]:
+        nuevo_tren = Tren(tren_data['id'], tren_data['capacidad'], tren_data['velocidad'])
+        
+        if ruta_principal:
+            nuevo_tren.ruta_actual = ruta_principal
+            nuevo_tren.estacion_actual = lista_objs_estaciones[0] # Empieza en la primera
+        
+        simulacion.registrar_entidad(nuevo_tren)
 
-    tren1 = Tren("T01")
-    tren1.ruta_actual = ruta1
-    tren1.estacion_actual = est1 
-    simulacion.registrar_entidad(tren1)
-
-    # --- 5. Iniciar la Interfaz Principal ---
-    # Nota: Ya no usamos app.iniciar() porque el mainloop ya vendrá manejado
-    # por la transición, pero creamos la ventana y la mantenemos viva.
+    # --- 6. LANZAR VENTANA PRINCIPAL ---
     app = VentanaPrincipal(simulacion)
     app.iniciar()
 
 def main():
-    # En lugar de iniciar la simulación directo, iniciamos el Launcher.
-    # Le pasamos la función 'iniciar_simulacion_real' como parámetro (callback).
+    # Iniciamos el Launcher
+    # Le pasamos la función de arriba para que la ejecute cuando demos "Iniciar"
     launcher = VentanaConfig(callback_iniciar=iniciar_simulacion_real)
     launcher.mostrar()
 
