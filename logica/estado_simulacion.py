@@ -28,6 +28,8 @@ class EstadoSimulacion:
         # Estado de ejecución
         self.ejecutando = False
 
+        self.logs_pendientes = []
+
     def registrar_entidad(self, entidad):
         """Método genérico para guardar estaciones, trenes o rutas."""
         # Detectamos el tipo de objeto y lo guardamos en su diccionario
@@ -57,34 +59,38 @@ class EstadoSimulacion:
             if tren.en_estacion:
                 self.gestionar_parada_tren(tren)
             
-    def gestionar_parada_tren(self, tren):
-        """Maneja la lógica de subir y bajar pasajeros cuando el tren llega."""
-        estacion = tren.obtener_estacion_actual()
-        if not estacion:
-            return
+    def agregar_log(self, mensaje):
+        """Guarda un mensaje con la hora actual para la interfaz."""
+        hora_str = self.tiempo_actual.strftime("%H:%M")
+        self.logs_pendientes.append(f"[{hora_str}] {mensaje}")
 
-        # 1. Bajar pasajeros (Si su destino es esta estación)
+    def gestionar_parada_tren(self, tren):
+        estacion = tren.obtener_estacion_actual()
+        if not estacion: return
+
+        # 1. Bajar pasajeros
         bajan = tren.bajar_pasajeros_en_estacion(estacion.id)
+        if bajan:
+            # En vez de print, usamos agregar_log
+            self.agregar_log(f"Tren {tren.id} llegó a {estacion.nombre}: Bajaron {len(bajan)}.")
+            
         for p in bajan:
             p.completar_viaje(self.tiempo_actual)
-            print(f"   ⬇️ Pasajero {p.id} se bajó en {estacion.nombre}")
 
-        # 2. Subir pasajeros (Si caben y el tren les sirve)
-        # Nota: Aquí podríamos filtrar si el tren va a donde ellos quieren,
-        # pero para simplificar, asumiremos que se suben al primero que pasa.
+        # 2. Subir pasajeros
         suben = []
-        # Iteramos sobre una copia de la lista porque vamos a borrar elementos
         for p in list(estacion.andenes):
             if tren.subir_pasajero(p):
                 estacion.andenes.remove(p)
                 p.estado = "VIAJANDO"
                 suben.append(p)
-            else:
-                # El tren se llenó
-                break
         
         if suben:
-            print(f"   ⬆️ {len(suben)} pasajeros subieron al tren {tren.id} en {estacion.nombre}")
+            self.agregar_log(f"Tren {tren.id} en {estacion.nombre}: Subieron {len(suben)}.")
+        
+        # Si no subió ni bajó nadie, igual avisamos que llegó
+        if not bajan and not suben:
+             self.agregar_log(f"Tren {tren.id} pasó por {estacion.nombre} (Sin cambios).")
 
     def crear_snapshot(self):
         """
