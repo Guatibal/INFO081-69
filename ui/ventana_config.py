@@ -25,7 +25,7 @@ class VentanaConfig:
 
         # --- BOTÓN ADMINISTRAR (NUEVO) ---
         # Este es el botón que te faltaba
-        btn_admin = tk.Button(self.root, text="⚙️ Administrar Datos", command=self.abrir_admin, 
+        btn_admin = tk.Button(self.root, text="⚙️ Administrar Trenes", command=self.abrir_admin, 
                               font=("Arial", 11, "bold"), bg="#2980B9", fg="white", width=20, height=2)
         btn_admin.pack(pady=10)
 
