@@ -72,3 +72,18 @@ class GestorDatos:
                 print("Configuración cargada exitosamente.")
             except Exception as e:
                 print(f"Error al cargar config: {e}")
+                
+    def borrar_configuracion(self):
+        """Elimina el archivo JSON y limpia la memoria."""
+        # 1. Borrar archivo físico
+        if os.path.exists(self.ARCHIVO_CONFIG):
+            os.remove(self.ARCHIVO_CONFIG)
+            print(f"Archivo {self.ARCHIVO_CONFIG} eliminado.")
+        
+        # 2. Limpiar memoria RAM
+        self.datos = {
+            "estaciones": [],
+            "trenes": [],
+            "rutas": []
+        }
+        return True

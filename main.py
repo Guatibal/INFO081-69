@@ -31,14 +31,36 @@ def iniciar_simulacion_real():
     # --- PROTECCIÓN: SI NO HAY DATOS ---
     # Si el usuario no ha creado nada en el Admin, creamos datos por defecto
     if not datos["estaciones"]:
-        print("⚠️ No hay estaciones configuradas. Usando datos de emergencia.")
-        # Creamos 2 estaciones básicas en memoria (no se guardan en json)
+        print("⚠️ No hay configuración personalizada.")
+        print("🔄 Cargando escenario de ejemplo: 'Ferroviario Valdivia' -> 'Ferroviario Bio-Bio'")
+        
+        # 1. Definimos las estaciones del ejemplo "dummy" pero con coordenadas visuales
         datos["estaciones"] = [
-            {'id': 'Central', 'nombre': 'Central', 'vias': 2, 'x': 100, 'y': 300},
-            {'id': 'Norte', 'nombre': 'Norte', 'vias': 1, 'x': 400, 'y': 100}
+            {
+                'id': 'Ferroviario Valdivia', 
+                'nombre': 'Ferroviario Valdivia', 
+                'vias': 2,     # Asumimos 2 vías como en el ejemplo
+                'x': 200,      # Coordenada X para que se vea a la izquierda
+                'y': 350       # Coordenada Y (centro vertical)
+            },
+            {
+                'id': 'Ferroviario Bio-Bio', 
+                'nombre': 'Ferroviario Bio-Bio', 
+                'vias': 2, 
+                'x': 600,      # Coordenada X para que se vea a la derecha
+                'y': 350
+            }
         ]
-        datos["trenes"] = [{'id': 'T01', 'capacidad': 100, 'velocidad': 10}]
-
+        
+        # 2. Definimos el tren del ejemplo
+        datos["trenes"] = [
+            {
+                'id': 'Tren-Dummy', 
+                'capacidad': 80, 
+                'velocidad': 12
+            }
+        ]
+        
     # Diccionario temporal para guardar los objetos Estacion creados
     # Lo necesitamos para luego asignar las rutas y generadores
     mapa_estaciones_obj = {} 

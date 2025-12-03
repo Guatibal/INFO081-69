@@ -2,12 +2,27 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "🔴 EJECUTAR SIMULACION (main.py)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                // AQUÍ ESTÁ EL TRUCO:
+                // Agregamos ';${workspaceFolder}/modules/modulo-eventos'
+                // para que Python encuentre el código del otro GitHub.
+                "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/modules/modulo-eventos"
+            }
+        },
+        {
             "name": "Current File (Local)",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "justMyCode": true ,
+            "justMyCode": true,
             "cwd": "${workspaceFolder}",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"
