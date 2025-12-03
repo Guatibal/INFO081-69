@@ -34,6 +34,7 @@ class EstadoSimulacion:
         self.ejecutando = False
 
         self.logs_pendientes = []
+        self.historial_logs = []
 
     def registrar_entidad(self, entidad):
         """Método genérico para guardar estaciones, trenes o rutas."""
@@ -94,7 +95,13 @@ class EstadoSimulacion:
     def agregar_log(self, mensaje):
         """Guarda un mensaje con la hora actual para la interfaz."""
         hora_str = self.tiempo_actual.strftime("%H:%M")
-        self.logs_pendientes.append(f"[{hora_str}] {mensaje}")
+        texto_completo = f"[{hora_str}] {mensaje}"
+        
+        # 1. Lo mandamos a la cola para que la UI lo muestre ahora
+        self.logs_pendientes.append(texto_completo)
+        
+        # 2. Lo guardamos en el historial permanente (para el guardado de partida)
+        self.historial_logs.append(texto_completo)
 
     def gestionar_parada_tren(self, tren):
         estacion = tren.obtener_estacion_actual()
