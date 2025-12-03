@@ -10,12 +10,9 @@
             "justMyCode": true,
             "cwd": "${workspaceFolder}",
             "env": {
-                // AQUÍ ESTÁ EL TRUCO:
-                // Agregamos ';${workspaceFolder}/modules/modulo-eventos'
-                // para que Python encuentre el código del otro GitHub.
                 "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/modules/modulo-eventos"
             }
-        },
+        }
         {
             "name": "Current File (Local)",
             "type": "debugpy",
@@ -66,3 +63,5 @@
         }
     ]
 }
+
+
