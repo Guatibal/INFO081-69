@@ -1,0 +1,83 @@
+{
+    "estaciones": [
+        {
+            "id": "a",
+            "nombre": "a",
+            "vias": 2,
+            "x": 0,
+            "y": 0
+        },
+        {
+            "id": "b1",
+            "nombre": "b1",
+            "vias": 1,
+            "x": 500,
+            "y": 500
+        },
+        {
+            "id": "final",
+            "nombre": "final",
+            "vias": 1,
+            "x": 250,
+            "y": 0
+        },
+        {
+            "id": "dulces",
+            "nombre": "dulces",
+            "vias": 1,
+            "x": 115,
+            "y": 80
+        },
+        {
+            "id": "fabrica",
+            "nombre": "fabrica",
+            "vias": 1,
+            "x": 300,
+            "y": 300
+        }
+    ],
+    "trenes": [
+        {
+            "id": "wasaaa",
+            "capacidad": 100,
+            "velocidad": 10
+        },
+        {
+            "id": "caca",
+            "capacidad": 100,
+            "velocidad": 10
+        },
+        {
+            "id": "caccatua",
+            "capacidad": 100,
+            "velocidad": 10
+        },
+        {
+            "id": "brasilenio",
+            "capacidad": 100,
+            "velocidad": 10
+        }
+    ],
+    "rutas": [
+        {
+            "tren_id": "wasaaa",
+            "origen": "a",
+            "destino": "b1"
+        },
+        {
+            "tren_id": "caca",
+            "origen": "a",
+            "destino": "final"
+        },
+        {
+            "tren_id": "caccatua",
+            "origen": "fabrica",
+            "destino": "dulces"
+        },
+        {
+            "tren_id": "brasilenio",
+            "origen": "dulces",
+            "destino": "fabrica"
+        }
+    ]
+}

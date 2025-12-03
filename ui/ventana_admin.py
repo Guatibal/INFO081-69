@@ -30,19 +30,15 @@ class VentanaAdmin(tk.Toplevel):
         
         self.tab_estaciones = ttk.Frame(tabControl)
         self.tab_trenes = ttk.Frame(tabControl)
-        self.tab_rutas = ttk.Frame(tabControl)
         
         tabControl.add(self.tab_estaciones, text='Estaciones y Vías')
         tabControl.add(self.tab_trenes, text='Trenes')
-        tabControl.add(self.tab_rutas, text='Rutas')
         
         tabControl.pack(expand=1, fill="both", padx=10, pady=10)
 
         # Inicializar contenidos
         self.crear_ui_estaciones()
         self.crear_ui_trenes()
-        # Rutas queda pendiente o simple por ahora
-        tk.Label(self.tab_rutas, text="Gestión de Rutas (Próximamente)", bg=COLOR_FONDO).pack(pady=20)
 
     def _crear_label(self, parent, texto, row, col):
         """Helper para crear etiquetas con TUS colores"""
@@ -131,4 +127,3 @@ class VentanaAdmin(tk.Toplevel):
         self.lista_trenes.delete(0, tk.END)
         for t in self.gestor.obtener_datos()["trenes"]:
             self.lista_trenes.insert(tk.END, f"Tren {t['id']}")
-        

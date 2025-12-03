@@ -15,13 +15,28 @@ class Tren:
         # 1 = Hacia adelante (0 -> 1 -> 2)
         # -1 = Hacia atrás (2 -> 1 -> 0)
         self.sentido = 1 
+        
+        # --- ESTADO DE ALMUERZO ---
+        self.debe_pausarse_por_almuerzo = False  # Flag para detenerse en próxima estación
+        self.pausado_por_almuerzo = False         # Flag cuando ya está pausado
 
     def mover(self, delta_tiempo_segundos, tiempo_actual_simulacion):
         if not self.ruta_actual:
             return
 
+        # --- VALIDACIÓN: Si está pausado por almuerzo, no se mueve ---
+        if self.pausado_por_almuerzo:
+            return
+
         # --- FASE 1: SALIR DE LA ESTACIÓN ---
         if self.en_estacion:
+            # Si debe pausarse por almuerzo, se queda en la estación
+            if self.debe_pausarse_por_almuerzo:
+                self.pausado_por_almuerzo = True
+                self.debe_pausarse_por_almuerzo = False
+                print(f"🍽️  Tren {self.id} pausado en {self.obtener_estacion_actual().nombre} por hora de almuerzo")
+                return
+            
             # Revisar si llegamos a un extremo para cambiar de sentido
             # Si estamos en la primera (0) -> Vamos hacia adelante (1)
             if self.indice_estacion_actual == 0:

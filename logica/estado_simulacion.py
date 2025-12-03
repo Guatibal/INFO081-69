@@ -10,6 +10,11 @@ class EstadoSimulacion:
         self.tiempo_inicio = datetime.datetime(2023, 1, 1, 8, 0, 0)
         self.tiempo_actual = self.tiempo_inicio
         
+        # --- HORARIO DE ALMUERZO ---
+        self.hora_almuerzo_inicio = 13  # 13:00
+        self.hora_almuerzo_fin = 14     # 14:00
+        self.en_horario_almuerzo = False
+        
         # --- ENTIDADES (RF01 y RF02) ---
         # Usamos diccionarios {id: Objeto} para búsquedas rápidas
         self.estaciones = {} 
@@ -44,8 +49,35 @@ class EstadoSimulacion:
         elif tipo == 'Pasajero':
             self.pasajeros[entidad.id] = entidad
 
+    def es_horario_almuerzo(self):
+        """Retorna True si estamos entre las 13:00 y 14:00."""
+        hora_actual = self.tiempo_actual.hour
+        return self.hora_almuerzo_inicio <= hora_actual < self.hora_almuerzo_fin
+
     def avanzar_tiempo(self, segundos=60):
+        hora_anterior = self.tiempo_actual.hour
         self.tiempo_actual += datetime.timedelta(seconds=segundos)
+        hora_actual = self.tiempo_actual.hour
+        
+        # Detectar cambio de horario de almuerzo
+        en_almuerzo_antes = self.hora_almuerzo_inicio <= hora_anterior < self.hora_almuerzo_fin
+        en_almuerzo_ahora = self.es_horario_almuerzo()
+        
+        # Transición: COMIENZA hora de almuerzo
+        if not en_almuerzo_antes and en_almuerzo_ahora:
+            self.en_horario_almuerzo = True
+            self.agregar_log("🍽️  HORA DE ALMUERZO - Todos los trenes se detienen en la próxima estación")
+            # Marcar todos los trenes para detenerse
+            for id_tren, tren in self.trenes.items():
+                tren.debe_pausarse_por_almuerzo = True
+        
+        # Transición: TERMINA hora de almuerzo
+        if en_almuerzo_antes and not en_almuerzo_ahora:
+            self.en_horario_almuerzo = False
+            self.agregar_log("✅ FIN DE ALMUERZO - Los trenes reanudan operaciones")
+            # Reanudar todos los trenes
+            for id_tren, tren in self.trenes.items():
+                tren.pausado_por_almuerzo = False
         
         # 1. Actualizar Estaciones (Generar pasajeros)
         for id_est, estacion in self.estaciones.items():
@@ -66,7 +98,8 @@ class EstadoSimulacion:
 
     def gestionar_parada_tren(self, tren):
         estacion = tren.obtener_estacion_actual()
-        if not estacion: return
+        if not estacion: 
+            return
 
         # 1. Bajar pasajeros
         bajan = tren.bajar_pasajeros_en_estacion(estacion.id)
@@ -89,7 +122,7 @@ class EstadoSimulacion:
         
         # Si no subió ni bajó nadie, igual avisamos que llegó
         if not bajan and not suben:
-             self.agregar_log(f"Tren {tren.id} pasó por {estacion.nombre} (Sin cambios).")
+            self.agregar_log(f"Tren {tren.id} pasó por {estacion.nombre} (Sin cambios).")
 
     def crear_snapshot(self):
         """
@@ -105,4 +138,3 @@ class EstadoSimulacion:
         self.tiempo_actual = self.tiempo_inicio
         self.historial_eventos = []
         # Nota: Aquí habría que reiniciar posiciones de trenes también
-        
