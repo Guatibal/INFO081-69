@@ -1,3 +1,5 @@
+# Simulador de Red Ferroviaria
+
 https://github.com/Guatibal/INFO081-69
 
 El presente informe detalla el diseño para el proyecto de simulación de una red ferroviaria.
@@ -15,6 +17,8 @@ Finalmente, el diseño incluye un módulo de persistencia de datos; este utiliza
 guardar el estado actual de la simulación y permitir cargar partidas guardadas, además de leer una configuración 
 inicial. El sistema también registrará una bitácora cronológica de todos los eventos relevantes (llegadas, salidas, 
 etc.) para su consulta posterior por parte del Operario.
+
+## Estructura del Proyecto
 
 El proyecto se organiza en diferentes carpetas.
 En la carpeta "models" se incluyen las clases que representan las entidades del sistema (trenes, estaciones y rutas).
